@@ -1,6 +1,7 @@
 
 import tkinter as tk
 from tkinter import messagebox
+from datetime import datetime
 import pickle
 import os
 
@@ -66,11 +67,46 @@ class FinanceApp:
         self.dashboard_frame.pack(pady=20)
 
         tk.Label(self.dashboard_frame, text=f"Welcome, {self.logged_in_user}!").pack(pady=10)
-        tk.Button(self.dashboard_frame, text="Logout", command=self.logout).pack()
+        tk.Button(self.dashboard_frame, text="Add Expense", command=self.add_expense).pack(fill=tk.X, pady=2)
+        tk.Button(self.dashboard_frame, text="Monthly Income", command=self.monthly_income).pack(fill=tk.X, pady=2)
+        tk.Button(self.dashboard_frame, text="Generate CSV", command=self.generate_csv).pack(fill=tk.X, pady=2)
+        tk.Button(self.dashboard_frame, text="Check Report", command=self.check_report).pack(fill=tk.X, pady=2)
+        tk.Button(self.dashboard_frame, text="Logout", command=self.logout).pack(pady=10)
 
     def clear_screen(self):
         for widget in self.root.winfo_children():
             widget.destroy()
+
+    def add_expense(self):
+        self.expense_window = tk.Toplevel(self.root)
+        self.expense_window.title("Add Expense")
+        self.expense_window.geometry("350x200")
+
+        frame = tk.Frame(self.expense_window, padx=10, pady=10)
+        frame.pack(expand=True)
+
+        tk.Label(frame, text="Description:").grid(row=0, column=0, sticky="w", pady=2)
+        self.expense_desc_entry = tk.Entry(frame)
+        self.expense_desc_entry.grid(row=0, column=1, pady=2)
+
+        tk.Label(frame, text="Amount:").grid(row=1, column=0, sticky="w", pady=2)
+        self.expense_amount_entry = tk.Entry(frame)
+        self.expense_amount_entry.grid(row=1, column=1, pady=2)
+
+        tk.Label(frame, text="Category:").grid(row=2, column=0, sticky="w", pady=2)
+        self.expense_category_entry = tk.Entry(frame)
+        self.expense_category_entry.grid(row=2, column=1, pady=2)
+
+        tk.Button(frame, text="Save Expense", command=self.save_expense).grid(row=3, columnspan=2, pady=10)
+
+    def monthly_income(self):
+        messagebox.showinfo("Info", "Monthly Income functionality not implemented yet.")
+
+    def generate_csv(self):
+        messagebox.showinfo("Info", "Generate CSV functionality not implemented yet.")
+
+    def check_report(self):
+        messagebox.showinfo("Info", "Check Report functionality not implemented yet.")
 
     def login(self):
         username = self.username_entry.get().strip()
@@ -111,13 +147,47 @@ class FinanceApp:
             messagebox.showerror("Error", "Username already exists.")
             return
 
-        users[username] = {"password": password, "full_name": full_name}
+        users[username] = {"password": password, "full_name": full_name, "expenses": []}
 
         with open("user_data.pkl", "wb") as f:
             pickle.dump(users, f)
 
         messagebox.showinfo("Success", "Signup successful! Please login.")
         self.show_login_screen()
+
+    def save_expense(self):
+        description = self.expense_desc_entry.get().strip()
+        amount_str = self.expense_amount_entry.get().strip()
+        category = self.expense_category_entry.get().strip()
+
+        if not description or not amount_str or not category:
+            messagebox.showerror("Error", "All fields are required.", parent=self.expense_window)
+            return
+
+        try:
+            amount = float(amount_str)
+        except ValueError:
+            messagebox.showerror("Error", "Amount must be a valid number.", parent=self.expense_window)
+            return
+
+        users = {}
+        if os.path.exists("user_data.pkl"):
+            with open("user_data.pkl", "rb") as f:
+                users = pickle.load(f)
+
+        new_expense = {
+            "description": description,
+            "amount": amount,
+            "category": category,
+            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        users[self.logged_in_user]["expenses"].append(new_expense)
+
+        with open("user_data.pkl", "wb") as f:
+            pickle.dump(users, f)
+
+        messagebox.showinfo("Success", "Expense added successfully!", parent=self.expense_window)
+        self.expense_window.destroy()
 
     def logout(self):
         self.logged_in_user = None
