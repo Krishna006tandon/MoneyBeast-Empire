@@ -98,7 +98,7 @@ class FinanceApp:
         username = self.new_username_entry.get().strip()
         password = self.new_password_entry.get().strip()
 
-        if not full_name.isalpha() or not username or not password:
+        if not full_name.replace(' ', '').isalpha() or not username or not password:
             messagebox.showerror("Error", "Invalid input. Please check your details.")
             return
 
