@@ -47,6 +47,7 @@ class FinanceManager(ThemedTk):
         self.add_expense_frame_obj = None
         self.monthly_income_frame_obj = None
         self.check_report_frame_obj = None
+        self.profile_frame_obj = None
         self.username_entry = None
         self.password_entry = None
         self.full_name_entry = None
@@ -97,6 +98,50 @@ class FinanceManager(ThemedTk):
             self.check_report_frame_obj = ttk.Frame(self.main_content_frame, padding="10 10 10 10")
             self.create_check_report_screen()
             self.check_report_frame_obj.pack(expand=True, fill=tk.BOTH)
+        elif frame_name == "profile":
+            self.profile_frame_obj = ttk.Frame(self.main_content_frame, padding="10 10 10 10")
+            self.create_profile_screen()
+            self.profile_frame_obj.pack(expand=True, fill=tk.BOTH)
+
+    def create_profile_screen(self):
+        self.profile_frame_obj.grid_columnconfigure(1, weight=1)
+
+        ttk.Label(self.profile_frame_obj, text="User Profile", style="Header.TLabel").grid(row=0, column=0, columnspan=2, pady=20, padx=10, sticky="w")
+
+        ttk.Label(self.profile_frame_obj, text="Full Name:").grid(row=1, column=0, padx=10, pady=5, sticky="w")
+        self.full_name_entry = ttk.Entry(self.profile_frame_obj, width=40)
+        self.full_name_entry.grid(row=1, column=1, padx=10, pady=5, sticky="ew")
+
+        ttk.Label(self.profile_frame_obj, text="New Password:").grid(row=2, column=0, padx=10, pady=5, sticky="w")
+        self.new_password_entry = ttk.Entry(self.profile_frame_obj, show="*")
+        self.new_password_entry.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
+
+        ttk.Button(self.profile_frame_obj, text="Save Profile", command=self.update_profile).grid(row=3, column=1, padx=10, pady=20, sticky="e")
+
+    def show_profile_screen(self):
+        self.show_content_frame("profile")
+        users = self.load_users()
+        user_data = users.get(self.logged_in_user, {})
+        full_name = user_data.get('full_name', '')
+        self.full_name_entry.delete(0, tk.END)
+        self.full_name_entry.insert(0, full_name)
+
+    def update_profile(self):
+        users = self.load_users()
+        user_data = users.get(self.logged_in_user, {})
+
+        new_full_name = self.full_name_entry.get().strip()
+        new_password = self.new_password_entry.get().strip()
+
+        if new_full_name:
+            user_data['full_name'] = new_full_name
+
+        if new_password:
+            user_data['password'] = new_password
+
+        self.save_users(users)
+        messagebox.showinfo("Success", "Profile updated successfully!")
+        self.show_dashboard_screen()
 
     def show_dashboard_screen(self):
         self.show_frame(self.dashboard_frame_obj)
@@ -106,30 +151,46 @@ class FinanceManager(ThemedTk):
         ttk.Label(self.main_content_frame, text="Select an option from the menu.", font=("Arial", 16)).pack(expand=True)
 
     def create_login_screen(self):
-        ttk.Label(self.login_frame_obj, text="Username:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
-        self.username_entry = ttk.Entry(self.login_frame_obj)
-        self.username_entry.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
-        ttk.Label(self.login_frame_obj, text="Password:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
-        self.password_entry = ttk.Entry(self.login_frame_obj, show="*")
-        self.password_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
-        ttk.Button(self.login_frame_obj, text="Login", command=self.login).grid(row=2, column=0, columnspan=2, pady=10)
-        ttk.Button(self.login_frame_obj, text="Signup", command=self.show_signup_screen).grid(row=3, column=0, columnspan=2)
+        self.login_frame_obj.grid_rowconfigure(0, weight=1)
+        self.login_frame_obj.grid_columnconfigure(0, weight=1)
+
+        form_frame = ttk.Frame(self.login_frame_obj, padding="20 20 20 20")
+        form_frame.grid(row=0, column=0)
+
+        ttk.Label(form_frame, text="Login", style="Header.TLabel").grid(row=0, column=0, columnspan=2, pady=10)
+
+        ttk.Label(form_frame, text="Username:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
+        self.username_entry = ttk.Entry(form_frame)
+        self.username_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+        ttk.Label(form_frame, text="Password:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
+        self.password_entry = ttk.Entry(form_frame, show="*")
+        self.password_entry.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
+        ttk.Button(form_frame, text="Login", command=self.login).grid(row=3, column=0, columnspan=2, pady=10)
+        ttk.Button(form_frame, text="Signup", command=self.show_signup_screen).grid(row=4, column=0, columnspan=2)
 
     def show_login_screen(self):
         self.show_frame(self.login_frame_obj)
 
     def create_signup_screen(self):
-        ttk.Label(self.signup_frame_obj, text="Full Name:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
-        self.full_name_entry = ttk.Entry(self.signup_frame_obj)
-        self.full_name_entry.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
-        ttk.Label(self.signup_frame_obj, text="Username:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
-        self.new_username_entry = ttk.Entry(self.signup_frame_obj)
-        self.new_username_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
-        ttk.Label(self.signup_frame_obj, text="Password:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
-        self.new_password_entry = ttk.Entry(self.signup_frame_obj, show="*")
-        self.new_password_entry.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
-        ttk.Button(self.signup_frame_obj, text="Signup", command=self.signup).grid(row=3, column=0, columnspan=2, pady=10)
-        ttk.Button(self.signup_frame_obj, text="Back to Login", command=self.show_login_screen).grid(row=4, column=0, columnspan=2)
+        self.signup_frame_obj.grid_rowconfigure(0, weight=1)
+        self.signup_frame_obj.grid_columnconfigure(0, weight=1)
+
+        form_frame = ttk.Frame(self.signup_frame_obj, padding="20 20 20 20")
+        form_frame.grid(row=0, column=0)
+
+        ttk.Label(form_frame, text="Signup", style="Header.TLabel").grid(row=0, column=0, columnspan=2, pady=10)
+
+        ttk.Label(form_frame, text="Full Name:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
+        self.full_name_entry = ttk.Entry(form_frame)
+        self.full_name_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+        ttk.Label(form_frame, text="Username:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
+        self.new_username_entry = ttk.Entry(form_frame)
+        self.new_username_entry.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
+        ttk.Label(form_frame, text="Password:").grid(row=3, column=0, padx=5, pady=5, sticky="w")
+        self.new_password_entry = ttk.Entry(form_frame, show="*")
+        self.new_password_entry.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
+        ttk.Button(form_frame, text="Signup", command=self.signup).grid(row=4, column=0, columnspan=2, pady=10)
+        ttk.Button(form_frame, text="Back to Login", command=self.show_login_screen).grid(row=5, column=0, columnspan=2)
 
     def show_signup_screen(self):
         self.show_frame(self.signup_frame_obj)
@@ -154,6 +215,7 @@ class FinanceManager(ThemedTk):
         ttk.Button(side_menu_frame, text="💰 Monthly Income", command=self.show_monthly_income_screen, style='SideMenu.TButton').pack(fill=tk.X, pady=5, padx=20)
         ttk.Button(side_menu_frame, text="📄 Generate CSV", command=self.generate_csv, style='SideMenu.TButton').pack(fill=tk.X, pady=5, padx=20)
         ttk.Button(side_menu_frame, text="📊 Check Report", command=self.show_check_report_screen, style='SideMenu.TButton').pack(fill=tk.X, pady=5, padx=20)
+        ttk.Button(side_menu_frame, text="👤 Profile", command=self.show_profile_screen, style='SideMenu.TButton').pack(fill=tk.X, pady=5, padx=20)
         ttk.Button(side_menu_frame, text="🚪 Logout", command=self.logout, style='SideMenu.TButton').pack(fill=tk.X, side=tk.BOTTOM, pady=15, padx=20)
 
     def show_dashboard_screen(self):
