@@ -306,27 +306,70 @@ class FinanceManager(ThemedTk):
 
     def create_check_report_screen(self):
         self.check_report_frame_obj.grid_columnconfigure(0, weight=1)
+        self.check_report_frame_obj.grid_rowconfigure(5, weight=1)
 
-        ttk.Label(self.check_report_frame_obj, text="Financial Report", style="Header.TLabel").grid(row=0, column=0, columnspan=2, pady=20, padx=10, sticky="w")
+        ttk.Label(self.check_report_frame_obj, text="📊 Monthly Financial Analytics", style="Header.TLabel").grid(row=0, column=0, columnspan=2, pady=20, padx=10, sticky="w")
 
+        # Summary Cards Frame
         summary_frame = ttk.Frame(self.check_report_frame_obj, style='TFrame')
         summary_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+        summary_frame.grid_columnconfigure(0, weight=1)
         summary_frame.grid_columnconfigure(1, weight=1)
+        summary_frame.grid_columnconfigure(2, weight=1)
 
-        self.report_income_label = ttk.Label(summary_frame, text="", font=("Arial", 11, "bold"))
-        self.report_income_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
-        self.report_expenses_label = ttk.Label(summary_frame, text="", font=("Arial", 11, "bold"))
-        self.report_expenses_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
-        self.report_balance_label = ttk.Label(summary_frame, text="", font=("Arial", 11, "bold"))
-        self.report_balance_label.grid(row=2, column=0, padx=5, pady=5, sticky="w")
+        # Income Card
+        income_card = ttk.Frame(summary_frame, style='TFrame', relief=tk.RAISED, borderwidth=2)
+        income_card.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
+        ttk.Label(income_card, text="💰 Monthly Salary", font=("Arial", 10, "bold"), foreground=self.accent_color).pack(pady=5, padx=10)
+        self.report_income_label = ttk.Label(income_card, text="", font=("Arial", 14, "bold"), foreground="green")
+        self.report_income_label.pack(pady=5, padx=10)
 
-        ttk.Label(self.check_report_frame_obj, text="--- Expenses by Category ---", style='Subheader.TLabel').grid(row=2, column=0, columnspan=2, pady=10, padx=10, sticky="w")
+        # Expenses Card
+        expenses_card = ttk.Frame(summary_frame, style='TFrame', relief=tk.RAISED, borderwidth=2)
+        expenses_card.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+        ttk.Label(expenses_card, text="💸 Total Expenses", font=("Arial", 10, "bold"), foreground=self.accent_color).pack(pady=5, padx=10)
+        self.report_expenses_label = ttk.Label(expenses_card, text="", font=("Arial", 14, "bold"), foreground="orange")
+        self.report_expenses_label.pack(pady=5, padx=10)
+
+        # Balance Card
+        balance_card = ttk.Frame(summary_frame, style='TFrame', relief=tk.RAISED, borderwidth=2)
+        balance_card.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
+        ttk.Label(balance_card, text="💵 Remaining Balance", font=("Arial", 10, "bold"), foreground=self.accent_color).pack(pady=5, padx=10)
+        self.report_balance_label = ttk.Label(balance_card, text="", font=("Arial", 14, "bold"))
+        self.report_balance_label.pack(pady=5, padx=10)
+
+        # Visual Progress Bar Frame
+        progress_frame = ttk.Frame(self.check_report_frame_obj, style='TFrame')
+        progress_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=15, sticky="ew")
+        progress_frame.grid_columnconfigure(0, weight=1)
+
+        ttk.Label(progress_frame, text="Budget Utilization:", font=("Arial", 11, "bold")).grid(row=0, column=0, sticky="w", padx=5, pady=5)
+        
+        self.progress_canvas = tk.Canvas(progress_frame, height=40, bg=self.primary_color, highlightthickness=0)
+        self.progress_canvas.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
+        
+        self.progress_percentage_label = ttk.Label(progress_frame, text="", font=("Arial", 10, "italic"))
+        self.progress_percentage_label.grid(row=2, column=0, sticky="w", padx=5, pady=2)
+
+        # Expense Breakdown Section
+        ttk.Label(self.check_report_frame_obj, text="📋 Expense Breakdown by Category", style='Subheader.TLabel').grid(row=3, column=0, columnspan=2, pady=10, padx=10, sticky="w")
+
+        # Category Details Frame with Canvas for visual bars
+        category_frame = ttk.Frame(self.check_report_frame_obj)
+        category_frame.grid(row=4, column=0, columnspan=2, padx=10, pady=10, sticky="ew")
+        category_frame.grid_columnconfigure(0, weight=1)
+
+        self.category_canvas = tk.Canvas(category_frame, bg=self.primary_color, highlightthickness=0, height=200)
+        self.category_canvas.pack(fill=tk.BOTH, expand=True)
+
+        # Detailed Text Report
+        ttk.Label(self.check_report_frame_obj, text="📝 Detailed Analytics", style='Subheader.TLabel').grid(row=5, column=0, columnspan=2, pady=10, padx=10, sticky="nw")
 
         text_frame = ttk.Frame(self.check_report_frame_obj)
-        text_frame.grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
-        self.check_report_frame_obj.grid_rowconfigure(3, weight=1)
+        text_frame.grid(row=6, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        self.check_report_frame_obj.grid_rowconfigure(6, weight=1)
 
-        self.report_text_widget = tk.Text(text_frame, wrap=tk.WORD, height=15, width=40, font=("Arial", 10),
+        self.report_text_widget = tk.Text(text_frame, wrap=tk.WORD, height=12, width=60, font=("Arial", 10),
                                           background=self.primary_color, foreground=self.text_color,
                                           highlightthickness=0, borderwidth=0)
         self.report_text_widget.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
@@ -334,9 +377,18 @@ class FinanceManager(ThemedTk):
         scrollbar = ttk.Scrollbar(text_frame, command=self.report_text_widget.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.report_text_widget.config(yscrollcommand=scrollbar.set)
+        # Styled tags for better readability in Detailed Analytics
+        self.report_text_widget.tag_config("header", font=("Arial", 11, "bold"), foreground=self.accent_color)
+        self.report_text_widget.tag_config("bold", font=("Arial", 10, "bold"))
+        self.report_text_widget.tag_config("ok", foreground="#2ecc71")
+        self.report_text_widget.tag_config("warn", foreground="#e67e22")
+        self.report_text_widget.tag_config("bad", foreground="#e74c3c")
+        self.report_text_widget.tag_config("label", foreground=self.secondary_color)
+        self.report_text_widget.tag_config("value", foreground="#ffffff")
+        self.report_text_widget.tag_config("mono", font=("Consolas", 10))
         self.report_text_widget.config(state=tk.DISABLED)
 
-        ttk.Button(self.check_report_frame_obj, text="Back to Dashboard", command=self.show_dashboard_screen).grid(row=4, column=0, padx=10, pady=20, sticky="w")
+        ttk.Button(self.check_report_frame_obj, text="Back to Dashboard", command=self.show_dashboard_screen).grid(row=7, column=0, padx=10, pady=20, sticky="w")
 
     def show_check_report_screen(self):
         self.show_content_frame("check_report")
@@ -356,28 +408,187 @@ class FinanceManager(ThemedTk):
                                        foreground="green" if remaining_balance >= 0 else "red")
 
     def update_report_content(self):
+        # Fetch data from user_data.pkl
         users = self.load_users()
         user_data = users.get(self.logged_in_user, {})
         monthly_income = user_data.get('monthly_income', 0.0)
         expenses = user_data.get('expenses', [])
         total_expenses = sum(expense.get('amount', 0.0) for expense in expenses)
         remaining_balance = monthly_income - total_expenses
-        self.report_income_label.config(text=f"Monthly Income: ${monthly_income:,.2f}")
-        self.report_expenses_label.config(text=f"Total Expenses: ${total_expenses:,.2f}")
-        self.report_balance_label.config(text=f"Remaining Balance: ${remaining_balance:,.2f}",
-                                                                           foreground="green" if remaining_balance >= 0 else "red")
-        self.report_text_widget.config(state=tk.NORMAL)
-        self.report_text_widget.delete(1.0, tk.END)
+
+        # Update summary cards with formatted values
+        self.report_income_label.config(text=f"${monthly_income:,.2f}")
+        self.report_expenses_label.config(text=f"${total_expenses:,.2f}")
+        self.report_balance_label.config(text=f"${remaining_balance:,.2f}",
+                                         foreground="green" if remaining_balance >= 0 else "red")
+
+        # Draw budget utilization progress bar
+        self.progress_canvas.delete("all")
+        canvas_width = self.progress_canvas.winfo_width()
+        if canvas_width <= 1:
+            canvas_width = 600  # Default width
+
+        if monthly_income > 0:
+            utilization_percentage = min((total_expenses / monthly_income) * 100, 100)
+            bar_width = (canvas_width - 20) * (utilization_percentage / 100)
+
+            # Background bar
+            self.progress_canvas.create_rectangle(10, 10, canvas_width - 10, 30,
+                                                  fill="#34495e", outline="")
+
+            # Progress bar with color based on utilization
+            if utilization_percentage <= 50:
+                bar_color = "green"
+            elif utilization_percentage <= 80:
+                bar_color = "orange"
+            else:
+                bar_color = "red"
+
+            self.progress_canvas.create_rectangle(10, 10, 10 + bar_width, 30,
+                                                  fill=bar_color, outline="")
+
+            # Percentage text
+            self.progress_canvas.create_text(canvas_width // 2, 20,
+                                            text=f"{utilization_percentage:.1f}%",
+                                            fill="white", font=("Arial", 12, "bold"))
+
+            self.progress_percentage_label.config(
+                text=f"You've spent {utilization_percentage:.1f}% of your monthly income"
+            )
+        else:
+            self.progress_canvas.create_text(canvas_width // 2, 20,
+                                            text="Set monthly income to see utilization",
+                                            fill=self.text_color, font=("Arial", 10))
+            self.progress_percentage_label.config(text="")
+
+        # Calculate expenses by category
         expenses_by_category = {}
         for expense in expenses:
             amount = expense.get('amount', 0.0)
             category = expense.get('category', 'Uncategorized')
             expenses_by_category[category] = expenses_by_category.get(category, 0.0) + amount
+
+        # Draw category breakdown bars
+        self.category_canvas.delete("all")
+        canvas_width = self.category_canvas.winfo_width()
+        if canvas_width <= 1:
+            canvas_width = 600
+
         if expenses_by_category:
-            for category, amount in expenses_by_category.items():
-                self.report_text_widget.insert(tk.END, f"{category}: ${amount:,.2f}\n")
+            sorted_categories = sorted(expenses_by_category.items(), key=lambda x: x[1], reverse=True)
+            max_amount = max(expenses_by_category.values())
+            bar_height = 30
+            y_offset = 10
+            colors = ["#3498db", "#e74c3c", "#f39c12", "#2ecc71", "#9b59b6", "#1abc9c", "#e67e22"]
+
+            for idx, (category, amount) in enumerate(sorted_categories):
+                bar_width = ((canvas_width - 200) * (amount / max_amount)) if max_amount > 0 else 0
+                color = colors[idx % len(colors)]
+
+                # Category name
+                self.category_canvas.create_text(10, y_offset + bar_height // 2,
+                                                text=category, anchor="w",
+                                                fill=self.text_color, font=("Arial", 10, "bold"))
+
+                # Bar
+                self.category_canvas.create_rectangle(150, y_offset, 150 + bar_width, y_offset + bar_height - 5,
+                                                     fill=color, outline="")
+
+                # Amount text
+                percentage = (amount / total_expenses * 100) if total_expenses > 0 else 0
+                self.category_canvas.create_text(160 + bar_width, y_offset + bar_height // 2,
+                                                text=f"${amount:,.2f} ({percentage:.1f}%)",
+                                                anchor="w", fill=self.text_color, font=("Arial", 9))
+
+                y_offset += bar_height + 10
         else:
-            self.report_text_widget.insert(tk.END, "No expenses recorded yet.\n")
+            self.category_canvas.create_text(canvas_width // 2, 100,
+                                            text="No expenses recorded yet",
+                                            fill=self.text_color, font=("Arial", 12))
+
+        # Update detailed text report with daily-use analytics
+        self.report_text_widget.config(state=tk.NORMAL)
+        self.report_text_widget.delete(1.0, tk.END)
+
+        # Header
+        self.report_text_widget.insert(tk.END, "MONTHLY FINANCIAL ANALYTICS\n", ("header",))
+        self.report_text_widget.insert(tk.END, f"📅 Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+
+        # Compute day-based metrics
+        today = datetime.now()
+        first_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if today.month == 12:
+            next_month_first = first_of_month.replace(year=today.year + 1, month=1)
+        else:
+            next_month_first = first_of_month.replace(month=today.month + 1)
+        days_in_month = (next_month_first - first_of_month).days or 30
+        days_passed = today.day
+        days_left = max(0, days_in_month - days_passed)
+
+        spend_per_day_actual = (total_expenses / days_passed) if days_passed > 0 else 0.0
+        planned_daily_budget = (monthly_income / days_in_month) if days_in_month > 0 else 0.0
+        safe_daily_spend_remaining = (remaining_balance / days_left) if days_left > 0 else 0.0
+        projected_month_end_balance = monthly_income - (spend_per_day_actual * days_in_month)
+
+        # Summary blocks
+        self.report_text_widget.insert(tk.END, "OVERVIEW\n", ("header",))
+        self.report_text_widget.insert(tk.END, "  Income: ", ("label",))
+        self.report_text_widget.insert(tk.END, f"${monthly_income:,.2f}\n", ("value",))
+        self.report_text_widget.insert(tk.END, "  Spent to date: ", ("label",))
+        self.report_text_widget.insert(tk.END, f"${total_expenses:,.2f}\n", ("value",))
+        balance_tag = "ok" if remaining_balance >= 0 else "bad"
+        self.report_text_widget.insert(tk.END, "  Remaining balance: ", ("label",))
+        self.report_text_widget.insert(tk.END, f"${remaining_balance:,.2f}\n", (balance_tag,))
+
+        self.report_text_widget.insert(tk.END, "\nTHIS MONTH\n", ("header",))
+        self.report_text_widget.insert(tk.END, f"  Days in month: {days_in_month}\n")
+        self.report_text_widget.insert(tk.END, f"  Days passed: {days_passed}\n")
+        self.report_text_widget.insert(tk.END, f"  Days left: {days_left}\n")
+        
+        budget_tag = "ok" if spend_per_day_actual <= planned_daily_budget else ("warn" if spend_per_day_actual <= planned_daily_budget * 1.2 else "bad")
+        self.report_text_widget.insert(tk.END, "  Actual burn/day: ", ("label",))
+        self.report_text_widget.insert(tk.END, f"${spend_per_day_actual:,.2f}\n", (budget_tag,))
+        self.report_text_widget.insert(tk.END, "  Planned budget/day: ", ("label",))
+        self.report_text_widget.insert(tk.END, f"${planned_daily_budget:,.2f}\n", ("value",))
+        safe_tag = "ok" if safe_daily_spend_remaining >= planned_daily_budget else "warn"
+        self.report_text_widget.insert(tk.END, "  Safe spend for today: ", ("label",))
+        self.report_text_widget.insert(tk.END, f"${safe_daily_spend_remaining:,.2f}\n", (safe_tag,))
+
+        proj_tag = "ok" if projected_month_end_balance >= 0 else "bad"
+        self.report_text_widget.insert(tk.END, "  Projected month-end balance: ", ("label",))
+        self.report_text_widget.insert(tk.END, f"${projected_month_end_balance:,.2f}\n", (proj_tag,))
+
+        # Category breakdown text
+        if expenses_by_category:
+            self.report_text_widget.insert(tk.END, "\nCATEGORY BREAKDOWN\n", ("header",))
+            for category, amount in sorted(expenses_by_category.items(), key=lambda x: x[1], reverse=True):
+                pct = (amount / total_expenses * 100) if total_expenses > 0 else 0
+                self.report_text_widget.insert(tk.END, f"  • {category}: ", ("label",))
+                self.report_text_widget.insert(tk.END, f"${amount:,.2f} ({pct:.1f}%)\n", ("value",))
+
+        # Recent transactions
+        if expenses:
+            self.report_text_widget.insert(tk.END, "\nRECENT TRANSACTIONS\n", ("header",))
+            for tx in list(reversed(expenses))[:5]:
+                dt = tx.get('date', '')
+                desc = tx.get('description', '')
+                cat = tx.get('category', '')
+                amt = tx.get('amount', 0.0)
+                line = f"  - [{dt}] {desc} ({cat}): ${amt:,.2f}\n"
+                self.report_text_widget.insert(tk.END, line, ("mono",))
+        else:
+            self.report_text_widget.insert(tk.END, "\nNo expenses yet. Start tracking to see insights.\n")
+
+        # Tips
+        if monthly_income > 0:
+            self.report_text_widget.insert(tk.END, "\nTIPS\n", ("header",))
+            if remaining_balance < 0:
+                self.report_text_widget.insert(tk.END, f"  ⚠️  Over budget by ${abs(remaining_balance):,.2f}. Reduce discretionary spend this week.\n", ("bad",))
+            elif spend_per_day_actual > planned_daily_budget:
+                self.report_text_widget.insert(tk.END, "  💡 You're above daily budget. Try a no-spend day to catch up.\n", ("warn",))
+            else:
+                self.report_text_widget.insert(tk.END, "  ✓ You're on track. Consider moving surplus to savings.\n", ("ok",))
+
         self.report_text_widget.config(state=tk.DISABLED)
 
     def generate_csv(self):
