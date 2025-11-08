@@ -12,15 +12,15 @@ class FinanceManager(ThemedTk):
         super().__init__(*args, **kwargs)
         self.set_theme("arc")
         self.title("Finance Manager")
-        self.attributes('-fullscreen', True)
-        self.bind('<Escape>', self.exit_fullscreen)
+        self.state('zoomed')  # Start maximized
+        self.minsize(800, 600) 
 
         self.style = ttk.Style(self)
         
         # --- Color Scheme ---
-        self.primary_color = "#2c3e50"
-        self.secondary_color = "#ecf0f1"
-        self.accent_color = "#3498db"
+        self.primary_color = "#1b263b"
+        self.secondary_color = "#e0e1dd"
+        self.accent_color = "#0d9276"
         self.text_color = "#ffffff"
 
         self.set_theme("clam")
