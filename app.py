@@ -209,6 +209,12 @@ def create_signup_screen():
 
     ttk.Button(signup_frame_obj, text="Back to Login", command=show_login_screen).grid(row=4, column=0, columnspan=2)
 
+    tk.Label(login_frame, text="Username:").grid(row=0, column=0, padx=10, pady=5)
+    username_entry = tk.Entry(login_frame)
+    username_entry.grid(row=0, column=1, padx=10, pady=5)
+   
+
+
 
 
 def show_signup_screen():
@@ -511,6 +517,14 @@ def generate_csv():
 
 
 
+
+def signup():
+    global logged_in_user
+    full_name = full_name_entry.get().strip()
+    username = new_username_entry.get().strip()
+    password = new_password_entry.get().strip()
+
+
     user_data = users.get(logged_in_user)
 
     if not user_data or not user_data.get("expenses"):
@@ -525,6 +539,7 @@ def generate_csv():
 
     if not os.path.exists("data"):
 
+
         os.makedirs("data")
 
 
@@ -532,6 +547,25 @@ def generate_csv():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     file_path = os.path.join("data", f"expenses_{logged_in_user}_{timestamp}.csv")
+
+    users = {}
+    if os.path.exists("user_data.pkl"):
+        with open("user_data.pkl", "rb") as f:
+            users = pickle.load(f)
+
+    if username in users and users[username]["password"] == password:
+        logged_in_user = username
+        with open("session.pkl", "wb") as f:
+            pickle.dump(logged_in_user, f)
+        show_dashboard()
+    else:
+        messagebox.showerror("Error", "Invalid username or password.")
+
+    messagebox.showinfo("Success", "Signup successful! ")
+    
+    
+
+
 
 
 
