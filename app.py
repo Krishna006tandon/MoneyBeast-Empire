@@ -39,6 +39,13 @@ class FinanceManager(ThemedTk):
         self.style.configure('SideMenu.TButton', font=('Arial', 11), background=self.primary_color, foreground=self.text_color, anchor='w')
         self.style.map('SideMenu.TButton', background=[('active', self.accent_color)])
 
+        # --- Treeview Style ---
+        self.style.configure("Treeview", background=self.primary_color, 
+                             fieldbackground=self.primary_color, foreground=self.text_color)
+        self.style.map('Treeview', background=[('selected', self.accent_color)])
+        self.style.configure("Treeview.Heading", font=('Arial', 10, 'bold'), background=self.primary_color, foreground=self.text_color)
+        self.style.map("Treeview.Heading", background=[('active', self.secondary_color)])
+
         # --- Instance Variables ---
         self.logged_in_user = None
         self.login_frame_obj = None
@@ -55,6 +62,7 @@ class FinanceManager(ThemedTk):
         self.expense_desc_entry = None
         self.expense_amount_entry = None
         self.expense_category_entry = None
+        self.expense_table = None
         self.income_entry = None
         self.current_income_label = None
         self.report_text_widget = None
@@ -98,13 +106,6 @@ class FinanceManager(ThemedTk):
             self.create_check_report_screen()
             self.check_report_frame_obj.pack(expand=True, fill=tk.BOTH)
 
-    def show_dashboard_screen(self):
-        self.show_frame(self.dashboard_frame_obj)
-        self.update_dashboard_summary()
-        for widget in self.main_content_frame.winfo_children():
-            widget.destroy()
-        ttk.Label(self.main_content_frame, text="Select an option from the menu.", font=("Arial", 16)).pack(expand=True)
-
     def create_login_screen(self):
         ttk.Label(self.login_frame_obj, text="Username:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
         self.username_entry = ttk.Entry(self.login_frame_obj)
@@ -145,7 +146,9 @@ class FinanceManager(ThemedTk):
         self.main_content_frame = ttk.Frame(self.dashboard_frame_obj, style='TFrame')
         self.main_content_frame.grid(row=0, column=1, sticky="nsew")
 
-        ttk.Label(side_menu_frame, text=f"Welcome, {self.logged_in_user}!", style='Header.TLabel').pack(pady=20, padx=20, anchor='w')
+        # This label will be updated in show_dashboard_screen
+        self.welcome_label = ttk.Label(side_menu_frame, text="", style='Header.TLabel')
+        self.welcome_label.pack(pady=20, padx=20, anchor='w')
         
         self.total_balance_label = ttk.Label(side_menu_frame, text="", style='Subheader.TLabel')
         self.total_balance_label.pack(pady=10, padx=20, anchor='w')
@@ -157,6 +160,9 @@ class FinanceManager(ThemedTk):
         ttk.Button(side_menu_frame, text="🚪 Logout", command=self.logout, style='SideMenu.TButton').pack(fill=tk.X, side=tk.BOTTOM, pady=15, padx=20)
 
     def show_dashboard_screen(self):
+        if self.logged_in_user:
+            self.welcome_label.config(text=f"Welcome, {self.logged_in_user}!")
+
         self.show_frame(self.dashboard_frame_obj)
         self.update_dashboard_summary()
         for widget in self.main_content_frame.winfo_children():
@@ -180,11 +186,42 @@ class FinanceManager(ThemedTk):
         self.expense_category_entry = ttk.Entry(self.add_expense_frame_obj)
         self.expense_category_entry.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
 
-        ttk.Button(self.add_expense_frame_obj, text="Save Expense", command=self.save_expense).grid(row=4, column=1, padx=10, pady=20, sticky="e")
-        ttk.Button(self.add_expense_frame_obj, text="Back to Dashboard", command=self.show_dashboard_screen).grid(row=4, column=0, padx=10, pady=20, sticky="w")
+        ttk.Button(self.add_expense_frame_obj, text="Save Expense", command=self.save_expense).grid(row=4, column=1, padx=10, pady=15, sticky="e")
+        ttk.Button(self.add_expense_frame_obj, text="Back to Dashboard", command=self.show_dashboard_screen).grid(row=4, column=0, padx=10, pady=15, sticky="w")
+
+        # --- Past Expenses Table ---
+        table_frame = ttk.Frame(self.add_expense_frame_obj)
+        table_frame.grid(row=5, column=0, columnspan=2, sticky="nsew", padx=10, pady=10)
+        table_frame.grid_columnconfigure(0, weight=1)
+        table_frame.grid_rowconfigure(0, weight=1)
+        self.add_expense_frame_obj.grid_rowconfigure(5, weight=1)
+
+        cols = ("Date", "Description", "Category", "Amount")
+        self.expense_table = ttk.Treeview(table_frame, columns=cols, show='headings', selectmode='browse')
+        for col in cols:
+            self.expense_table.heading(col, text=col)
+        self.expense_table.column("Date", width=150, anchor=tk.W)
+        self.expense_table.column("Description", width=200, anchor=tk.W)
+        self.expense_table.column("Category", width=100, anchor=tk.W)
+        self.expense_table.column("Amount", width=80, anchor=tk.E)
+
+        self.expense_table.grid(row=0, column=0, sticky="nsew")
+
+        scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=self.expense_table.yview)
+        self.expense_table.configure(yscrollcommand=scrollbar.set)
+        scrollbar.grid(row=0, column=1, sticky='ns')
 
     def show_add_expense_screen(self):
         self.show_content_frame("add_expense")
+        self.populate_expense_table()
+
+    def populate_expense_table(self):
+        for i in self.expense_table.get_children():
+            self.expense_table.delete(i)
+        users = self.load_users()
+        user_expenses = users.get(self.logged_in_user, {}).get('expenses', [])
+        for expense in reversed(user_expenses): # Show most recent first
+            self.expense_table.insert("", "end", values=(expense['date'], expense['description'], expense['category'], f"${expense['amount']:,.2f}"))
 
     def create_monthly_income_screen(self):
         self.monthly_income_frame_obj.grid_columnconfigure(1, weight=1)
@@ -360,8 +397,11 @@ class FinanceManager(ThemedTk):
         }
         users[self.logged_in_user]["expenses"].append(new_expense)
         self.save_users(users)
+        self.expense_desc_entry.delete(0, tk.END)
+        self.expense_amount_entry.delete(0, tk.END)
+        self.expense_category_entry.delete(0, tk.END)
         messagebox.showinfo("Success", "Expense added successfully!")
-        self.show_dashboard_screen()
+        self.populate_expense_table()
         self.update_dashboard_summary()
 
     def save_income(self):
