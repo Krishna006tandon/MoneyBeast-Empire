@@ -32,6 +32,7 @@ def show_login_screen():
     tk.Label(login_frame, text="Username:").grid(row=0, column=0, padx=10, pady=5)
     username_entry = tk.Entry(login_frame)
     username_entry.grid(row=0, column=1, padx=10, pady=5)
+   
 
     tk.Label(login_frame, text="Password:").grid(row=1, column=0, padx=10, pady=5)
     password_entry = tk.Entry(login_frame, show="*")
@@ -136,6 +137,7 @@ def login():
         messagebox.showerror("Error", "Invalid username or password.")
 
 def signup():
+    global logged_in_user
     full_name = full_name_entry.get().strip()
     username = new_username_entry.get().strip()
     password = new_password_entry.get().strip()
@@ -158,8 +160,23 @@ def signup():
     with open("user_data.pkl", "wb") as f:
         pickle.dump(users, f)
 
-    messagebox.showinfo("Success", "Signup successful! Please login.")
-    show_login_screen()
+    users = {}
+    if os.path.exists("user_data.pkl"):
+        with open("user_data.pkl", "rb") as f:
+            users = pickle.load(f)
+
+    if username in users and users[username]["password"] == password:
+        logged_in_user = username
+        with open("session.pkl", "wb") as f:
+            pickle.dump(logged_in_user, f)
+        show_dashboard()
+    else:
+        messagebox.showerror("Error", "Invalid username or password.")
+
+    messagebox.showinfo("Success", "Signup successful! ")
+    
+    
+
 
 def save_expense():
     description = expense_desc_entry.get().strip()
